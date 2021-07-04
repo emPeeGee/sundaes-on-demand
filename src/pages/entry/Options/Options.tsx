@@ -5,14 +5,18 @@ import { Row } from 'react-bootstrap';
 import { ScoopOptions } from '../ScoopOptions/ScoopOptions';
 import { ToppingOptions } from '../ToppingOptions/ToppingOptions';
 import { AlertBanner } from '../../common/AlertBanner/AlertBanner';
+import { pricePerItem } from '../../../constants';
+import { useOrderDetails } from '../../../context/OrderDetails';
 
 interface OptionsProps {
-  optionType: string;
+  optionType: 'scoops' | 'toppings';
 }
 
 export function Options({ optionType }: OptionsProps): JSX.Element {
   const [items, setItems] = React.useState<any[]>([]);
   const [error, setError] = React.useState<boolean>(false);
+
+  const [orderDetails, updateItemCount] = useOrderDetails();
 
   React.useEffect(() => {
     axios
@@ -29,15 +33,42 @@ export function Options({ optionType }: OptionsProps): JSX.Element {
     return <AlertBanner />;
   }
 
-  return (
-    <Row>
-      {items.map((item) => {
-        if (optionType === 'scoops') {
-          return <ScoopOptions key={item.name} name={item.name} imagePath={item.imagePath} />;
-        }
+  const title = `${optionType[0].toUpperCase()}${optionType.slice(1).toLowerCase()}`;
 
-        return <ToppingOptions key={item.name} name={item.name} imagePath={item.imagePath} />;
-      })}
-    </Row>
+  return (
+    <>
+      <h2>{title}</h2>
+      <p>{pricePerItem[optionType]} each</p>
+      <p>
+        {title} total: {orderDetails.totals[optionType]}
+      </p>
+      <Row>
+        {items.map((item) => {
+          if (optionType === 'scoops') {
+            return (
+              <ScoopOptions
+                key={item.name}
+                name={item.name}
+                imagePath={item.imagePath}
+                updateItemCount={(itemName: string, newItemCount: number) =>
+                  updateItemCount(itemName, newItemCount, optionType)
+                }
+              />
+            );
+          }
+
+          return (
+            <ToppingOptions
+              key={item.name}
+              name={item.name}
+              imagePath={item.imagePath}
+              updateItemCount={(itemName: string, newItemCount: number) =>
+                updateItemCount(itemName, newItemCount, optionType)
+              }
+            />
+          );
+        })}
+      </Row>
+    </>
   );
 }
