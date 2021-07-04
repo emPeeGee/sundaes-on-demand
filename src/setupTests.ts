@@ -9,8 +9,6 @@ import { server } from './mocks/server';
 beforeAll(() => server.listen());
 
 afterEach(() => {
-  console.log('aaa');
-
   server.resetHandlers();
 });
 
