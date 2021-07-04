@@ -3,14 +3,16 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Options } from './Options';
 
-test('displays image for each scoop options from server', () => {
+test('displays image for each scoop options from server', async () => {
   render(<Options optionType="scoops" />);
 
   // find images
-  const scoopImages = screen.getAllByRole('img', { name: /scoop$/i }) as HTMLImageElement[];
+  const scoopImages = (await screen.findAllByRole('img', {
+    name: /scoop$/i,
+  })) as HTMLImageElement[];
   expect(scoopImages).toHaveLength(2);
 
   // confirm alt text of images
   const altText = scoopImages.map((element) => element.alt);
-  expect(altText).toEqual(['Chocolate', 'Vanilla']);
+  expect(altText).toEqual(['Chocolate scoop', 'Vanilla scoop']);
 });
